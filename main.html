@@ -1,0 +1,184 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Curved Ouija</title>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin:0; padding:0;
+      width:100vw; height:100vh;
+      background-color:#E19A18;
+      display:flex; justify-content:center; align-items:center;
+      font-family:'Creepster', cursive; color:#222;
+      overflow:hidden;
+    }
+    #board {
+      position:relative;
+      width:90vw; height:90vh;
+    }
+    #logo {
+      position:absolute; top:0%; left:50%;
+      transform:translateX(-50%);
+      font-size:3.5rem;
+    }
+    svg.curve {
+      position:absolute; left:5%; width:90%;
+    }
+    #row1-svg { top: 10%; height: 50%; }
+    #row2-svg { top: 25%; height: 50%; }
+    #row3-svg { top: 42.5%; height: 50%; }
+    .curve text {
+      font-size:4.5rem; fill:#222;
+      font-family:'Creepster', cursive;
+    }
+    #yes, #no, #goodbye, #micBtn, #response, #planchette {
+      position:absolute;
+    }
+    #yes { top:10%; left:5%; }
+    #no  { top:10%; right:5%; }
+    #goodbye { bottom:10%; left:50%; transform:translateX(-50%); }
+    #micBtn { bottom:1%; left:46.5%; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#222; }
+    #response { bottom:-1%; left:50%; transform:translateX(-50%); font-size:0.5rem; }
+    #planchette {
+      width:50px; height:50px;
+      background:url('planchette.png') center/contain no-repeat;
+      transition:transform .5s ease; pointer-events:none;
+      bottom:15%; left:45%;
+    }
+  </style>
+</head>
+<body>
+  <div id="board">
+    <div id="logo">OUIJA</div>
+    <!-- Curved letter rows via SVG -->
+    <svg id="row1-svg" class="curve" viewBox="0 0 1000 200">
+      <path id="path1" d="M50,150 C250,50 750,50 950,150" fill="none" />
+      <text>
+        <textPath href="#path1" startOffset="0%" textLength="900">ABCDEFGHIJKLM</textPath>
+      </text>
+    </svg>
+    <svg id="row2-svg" class="curve" viewBox="0 0 1000 200">
+      <path id="path2" d="M50,150 C250,70 750,70 950,150" fill="none" />
+      <text>
+        <textPath href="#path2" startOffset="0%" textLength="900">NOPQRSTUVWXYZ</textPath>
+      </text>
+    </svg>
+    <svg id="row3-svg" class="curve" viewBox="0 0 1000 200">
+      <path id="path3" d="M50,150 L950,150" fill="none" />
+      <text>
+        <textPath href="#path3" startOffset="0%" textLength="900">1234567890</textPath>
+      </text>
+    </svg><div id="yes" class="cell">YES</div>
+<div id="no" class="cell">NO</div>
+<div id="goodbye" class="cell">GOODBYE</div>
+<button id="micBtn">🎤</button>
+<div id="response">Speak to the spirits</div>
+<div id="planchette"></div>
+
+  </div> <script>
+  const micBtn = document.getElementById('micBtn');
+  const responseBox = document.getElementById('response');
+  const planchette = document.getElementById('planchette');
+
+  let recognition, listening = false;
+  let currentMessage = '';
+  let spellIndex = 0;
+  let isHolding = false;
+  let isSpelling = false;
+
+  if ('webkitSpeechRecognition' in window) {
+    recognition = new webkitSpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      listening = true;
+      micBtn.textContent = '🎙️';
+      responseBox.textContent = 'Listening...';
+    };
+
+    recognition.onend = () => {
+      listening = false;
+      micBtn.textContent = '🎤';
+    };
+
+    recognition.onerror = e => {
+      responseBox.textContent = 'Error:' + e.error;
+    };
+
+    recognition.onresult = e => {
+      const pool = ['HELLO', 'RUN', 'DEATH', 'I SEE YOU', 'NOT ALONE'];
+      currentMessage = pool[Math.floor(Math.random() * pool.length)];
+      responseBox.textContent = 'Touch & hold the planchette...';
+      spellIndex = 0;
+    };
+  } else {
+    responseBox.textContent = 'Speech not supported';
+  }
+
+  micBtn.onclick = () => {
+    if (recognition) {
+      if (listening) recognition.stop();
+      else recognition.start();
+    }
+  };
+
+  // Hold detection
+  planchette.addEventListener('mousedown', () => isHolding = true);
+  planchette.addEventListener('mouseup', () => isHolding = false);
+  planchette.addEventListener('touchstart', () => isHolding = true);
+  planchette.addEventListener('touchend', () => isHolding = false);
+
+  // Spell loop
+  setInterval(() => {
+    if (isHolding && currentMessage && !isSpelling && spellIndex < currentMessage.length) {
+      const ch = currentMessage[spellIndex];
+      spellLetter(ch, () => {
+        spellIndex++;
+        if (spellIndex >= currentMessage.length) {
+          responseBox.textContent = currentMessage;
+          currentMessage = '';
+        }
+        isSpelling = false;
+      });
+      isSpelling = true;
+    }
+  }, 100);
+
+  function spellLetter(ch, done) {
+    const pathIndex = getPathIndex(ch);
+    const path = document.getElementById('path' + pathIndex);
+    if (!path) return;
+
+    const length = path.getTotalLength();
+    const charIndex = getCharIndex('path' + pathIndex, ch);
+    const pos = path.getPointAtLength(length * (charIndex / (path.parentNode.textContent.length - 1)));
+
+    planchette.style.transform = `translate(${pos.x * 0.09}vw, ${(pos.y * 0.09) + getTopOffset(pathIndex)}vh)`;
+
+    setTimeout(done, 500); // wait before next letter
+  }
+
+  function getTopOffset(pathIndex) {
+    if (pathIndex === 1) return 10;
+    if (pathIndex === 2) return 25;
+    return 42.5;
+  }
+
+  function getPathIndex(ch) {
+    if ('ABCDEFGHIJKLM'.includes(ch)) return 1;
+    if ('NOPQRSTUVWXYZ'.includes(ch)) return 2;
+    return 3;
+  }
+
+  function getCharIndex(pathId, ch) {
+    const strings = {
+      'path1': 'ABCDEFGHIJKLM',
+      'path2': 'NOPQRSTUVWXYZ',
+      'path3': '1234567890'
+    };
+    return strings[pathId].indexOf(ch);
+  }
+</script></body>
+</html>
