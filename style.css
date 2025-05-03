@@ -4,11 +4,10 @@ html, body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: #111;
+  background-image: url('board.png');
 }
 
 #board {
-  background-image: url('board.png')
   position: fixed;
   top: 0;
   left: 0;
