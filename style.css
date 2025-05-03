@@ -49,9 +49,3 @@ svg.curve {
   border-radius: 50%;
   box-shadow: 0 0 10px #fff;
 }
-@media (orientation: landscape) {
-  #board {
-    width: 6vmin;
-    height: 6vmin;
-  }
-}
