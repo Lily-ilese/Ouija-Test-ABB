@@ -1,0 +1,58 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #111;
+}
+
+#board {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+svg.curve {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+
+#planchette {
+  position: absolute;
+  width: 10vmin;
+  height: 10vmin;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+#micBtn {
+  position: fixed;
+  bottom: 5vh;
+  right: 5vw;
+  padding: 1rem;
+  font-size: 1.5rem;
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #fff;
+}
+
+@media (orientation: landscape) {
+  #planchette {
+    width: 6vmin;
+    height: 6vmin;
+  }
+}
