@@ -8,6 +8,7 @@ html, body {
 
 #board {
     background-image: url('board.png');
+  background-size: cover;
   position: fixed;
   top: 0;
   left: 0;
