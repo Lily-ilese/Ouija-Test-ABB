@@ -4,10 +4,10 @@ html, body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background-image: url('board.png');
 }
 
 #board {
+    background-image: url('board.png');
   position: fixed;
   top: 0;
   left: 0;
@@ -45,4 +45,10 @@ svg.curve {
   border: none;
   border-radius: 50%;
   box-shadow: 0 0 10px #fff;
+}
+@media (orientation: landscape) {
+  #board {
+    width: 6vmin;
+    height: 6vmin;
+  }
 }
