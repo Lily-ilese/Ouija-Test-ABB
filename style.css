@@ -8,6 +8,7 @@ html, body {
 }
 
 #board {
+  background-image: url('board.png')
   position: fixed;
   top: 0;
   left: 0;
